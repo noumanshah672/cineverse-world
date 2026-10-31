@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Search, Film, Clapperboard, Sparkles, Bookmark, Play, Globe2, ChevronDown, Menu, X, Clock3, Languages, ExternalLink } from 'lucide-react'
-import { movies, categories, type Movie } from './data'
+import { movies, categories, type Movie } from './Data'
 
 function App() {
   const [query, setQuery] = useState('')
