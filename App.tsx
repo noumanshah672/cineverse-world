@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react'
 import {
   Search, Film, Clapperboard, Sparkles, Bookmark, Play,
-  Globe2, ChevronDown, Menu, X, Clock3, Languages, ExternalLink
+  Globe2, Menu, X, Clock3, Languages, ExternalLink
 } from 'lucide-react'
 import { movies, categories, type Movie } from './data'
 
@@ -27,15 +27,15 @@ function App() {
 
     if (text.includes(normalizedQuery)) return true
 
-    if (normalizedQuery === 'show' || normalizedQuery === 'shows' || normalizedQuery === 'drama') {
+    if (['show', 'shows', 'drama', 'dramas'].includes(normalizedQuery)) {
       return m.type === 'Series'
     }
 
-    if (normalizedQuery === 'cartoon' || normalizedQuery === 'cartoons') {
+    if (['cartoon', 'cartoons'].includes(normalizedQuery)) {
       return m.type === 'Anime'
     }
 
-    if (normalizedQuery === 'film' || normalizedQuery === 'films') {
+    if (['film', 'films'].includes(normalizedQuery)) {
       return m.type === 'Movie'
     }
 
@@ -61,48 +61,62 @@ function App() {
     if (!normalizedQuery) return []
 
     const titleMatches = movies
-      .filter(m => matchesSearch(m))
+      .filter(matchesSearch)
       .map(m => ({
         label: m.title,
-        detail: `${m.type} • ${m.language}`,
+        detail: `${m.type} • ${m.language} • ${m.year}`,
         value: m.title,
         kind: 'title'
       }))
 
     const categoryWords = [
-      { label: 'Punjabi', detail: 'Punjabi movies and shows', value: 'Punjabi', kind: 'category' },
-      { label: 'Movies', detail: 'All movies', value: 'Movies', kind: 'category' },
-      { label: 'Series', detail: 'All TV shows and series', value: 'Series', kind: 'category' },
-      { label: 'Anime', detail: 'All anime', value: 'Anime', kind: 'category' },
-      { label: 'Hindi', detail: 'Hindi-language titles', value: 'Hindi', kind: 'language' },
-      { label: 'English', detail: 'English-language titles', value: 'English', kind: 'language' },
-      { label: 'Korean', detail: 'Korean-language titles', value: 'Korean', kind: 'language' },
-      { label: 'Japanese', detail: 'Japanese-language titles', value: 'Japanese', kind: 'language' }
-    ].filter(item => item.label.toLowerCase().includes(normalizedQuery))
+      { label: 'Punjabi Cinema', detail: 'Punjabi movies and shows', value: 'Punjabi', kind: 'category', terms: ['punjabi'] },
+      { label: 'Movies', detail: 'All available movies', value: 'Movies', kind: 'category', terms: ['movie', 'movies', 'film', 'films'] },
+      { label: 'TV Shows & Series', detail: 'All available shows and dramas', value: 'Series', kind: 'category', terms: ['show', 'shows', 'series', 'drama', 'dramas'] },
+      { label: 'Anime', detail: 'All available anime', value: 'Anime', kind: 'category', terms: ['anime', 'cartoon', 'cartoons'] },
+      { label: 'Hindi', detail: 'Hindi-language titles', value: 'Hindi', kind: 'language', terms: ['hindi'] },
+      { label: 'English', detail: 'English-language titles', value: 'English', kind: 'language', terms: ['english'] },
+      { label: 'Korean', detail: 'Korean-language titles', value: 'Korean', kind: 'language', terms: ['korean'] },
+      { label: 'Japanese', detail: 'Japanese-language titles', value: 'Japanese', kind: 'language', terms: ['japanese'] }
+    ]
+      .filter(item => item.terms.some(term => term.includes(normalizedQuery) || normalizedQuery.includes(term)))
+      .map(({ label, detail, value, kind }) => ({ label, detail, value, kind }))
 
     const uniqueTitles = titleMatches.filter(
       (item, index, self) => self.findIndex(x => x.label === item.label) === index
     )
 
-    return [...categoryWords, ...uniqueTitles].slice(0, 8)
+    return [...categoryWords, ...uniqueTitles]
   }, [query])
 
   const chooseSuggestion = (item: { label: string; value: string; kind: string }) => {
-    setQuery(item.value)
     setShowSuggestions(false)
     setVisibleCount(12)
 
+    if (item.kind === 'title') {
+      const movie = movies.find(m => m.title === item.value)
+      if (movie) setSelected(movie)
+      setQuery('')
+      return
+    }
+
     if (item.kind === 'category') {
       setCategory(item.value)
+      setLanguage('All languages')
+      setGenre('All genres')
       setQuery('')
     } else if (item.kind === 'language') {
       setLanguage(item.value)
+      setCategory('All')
+      setGenre('All genres')
       setQuery('')
     }
   }
 
   const toggleWatchlist = (id: number) =>
-    setWatchlist(old => old.includes(id) ? old.filter(x => x !== id) : [...old, id])
+    setWatchlist(old =>
+      old.includes(id) ? old.filter(x => x !== id) : [...old, id]
+    )
 
   const featured = movies.find(m => m.id === 7) || movies[0]
 
@@ -167,6 +181,7 @@ function App() {
         <button className="brand" onClick={() => {
           setCategory('All')
           setQuery('')
+          setShowSuggestions(false)
         }}>
           <span className="brand-icon"><Clapperboard size={23} /></span>
           <span>MOVIE <b>NOVA</b><small>A UNIVERSE OF MOVIES & ENTERTAINMENT</small></span>
@@ -181,6 +196,7 @@ function App() {
                 setCategory(item === 'Discover' ? 'All' : item)
                 setVisibleCount(12)
                 setQuery('')
+                setShowSuggestions(false)
                 setMobileMenu(false)
               }}
             >
@@ -190,11 +206,10 @@ function App() {
         </nav>
 
         <div className="top-actions">
-          <button
-            className="icon-button"
-            onClick={() => document.getElementById('search')?.focus()}
-            aria-label="Search"
-          >
+          <button className="icon-button" onClick={() => {
+            document.getElementById('search')?.focus()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }} aria-label="Search">
             <Search />
           </button>
           <button className="menu-toggle" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Menu">
@@ -204,6 +219,158 @@ function App() {
       </header>
 
       <main>
+        <section className="search-top" style={{
+          padding: '22px 5%',
+          background: '#101116',
+          borderBottom: '1px solid #292c35'
+        }}>
+          <div style={{
+            maxWidth: '1100px',
+            margin: '0 auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            alignItems: 'center'
+          }}>
+            <div className="search-box" style={{
+              position: 'relative',
+              flex: '1 1 280px',
+              minWidth: '0',
+              background: '#1b1d25',
+              border: '1px solid #414554',
+              borderRadius: '12px',
+              padding: '0 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              color: '#b9bdca',
+              minHeight: '50px'
+            }}>
+              <Search size={19} />
+              <input
+                id="search"
+                value={query}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={e => {
+                  setQuery(e.target.value)
+                  setShowSuggestions(true)
+                  setVisibleCount(12)
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && suggestionItems.length > 0) {
+                    chooseSuggestion(suggestionItems[0])
+                  }
+                  if (e.key === 'Escape') setShowSuggestions(false)
+                }}
+                placeholder="Search Punjabi, Kapil, anime, shows..."
+                autoComplete="off"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: 'transparent',
+                  color: '#fff',
+                  border: 0,
+                  outline: 'none',
+                  padding: '14px 0',
+                  fontSize: '15px'
+                }}
+              />
+              {query && (
+                <button onClick={() => {
+                  setQuery('')
+                  setShowSuggestions(false)
+                }} aria-label="Clear search" style={{
+                  background: 'transparent',
+                  color: '#fff',
+                  border: 0,
+                  cursor: 'pointer'
+                }}>
+                  <X size={16} />
+                </button>
+              )}
+
+              {showSuggestions && query.trim() && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 9px)',
+                  left: 0,
+                  right: 0,
+                  zIndex: 200,
+                  background: '#171922',
+                  border: '1px solid #414554',
+                  borderRadius: '12px',
+                  padding: '8px',
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.65)',
+                  maxHeight: '65vh',
+                  overflowY: 'auto'
+                }}>
+                  <div style={{
+                    color: '#999eae',
+                    fontSize: '11px',
+                    letterSpacing: '1px',
+                    padding: '8px 12px'
+                  }}>
+                    SEARCH SUGGESTIONS
+                  </div>
+
+                  {suggestionItems.length > 0 ? suggestionItems.map((item, index) => (
+                    <button
+                      key={`${item.kind}-${item.value}-${index}`}
+                      onClick={() => chooseSuggestion(item)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        padding: '12px',
+                        border: 0,
+                        borderRadius: '8px',
+                        background: 'transparent',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = '#292d3a'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent'
+                      }}
+                    >
+                      <strong style={{ fontSize: '14px' }}>{item.label}</strong>
+                      <small style={{ color: '#a5a9b5', marginTop: '4px' }}>{item.detail}</small>
+                    </button>
+                  )) : (
+                    <p style={{ color: '#a5a9b5', padding: '12px', margin: 0 }}>
+                      No suggestions found. Try another word.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <label className="select-wrap">
+              <Languages size={16} />
+              <select value={language} onChange={e => {
+                setLanguage(e.target.value)
+                setVisibleCount(12)
+              }}>
+                {languages.map(l => <option key={l}>{l}</option>)}
+              </select>
+            </label>
+
+            <label className="select-wrap">
+              <Film size={16} />
+              <select value={genre} onChange={e => {
+                setGenre(e.target.value)
+                setVisibleCount(12)
+              }}>
+                {genres.map(g => <option key={g}>{g}</option>)}
+              </select>
+            </label>
+          </div>
+        </section>
+
         <section className="hero">
           <div className="hero-art">
             <div className="orb orb-one" />
@@ -221,6 +388,7 @@ function App() {
               </button>
               <button className="secondary-button" onClick={() => {
                 setCategory('Punjabi')
+                setQuery('')
                 document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })
               }}>
                 Punjabi movies <span>→</span>
@@ -276,102 +444,6 @@ function App() {
             </div>
           </div>
 
-          <div className="search-row">
-            <div className="search-box" style={{ position: 'relative', flex: 1 }}>
-              <Search size={18} />
-              <input
-                id="search"
-                value={query}
-                onFocus={() => setShowSuggestions(true)}
-                onChange={e => {
-                  setQuery(e.target.value)
-                  setShowSuggestions(true)
-                  setVisibleCount(12)
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && suggestionItems.length > 0) {
-                    chooseSuggestion(suggestionItems[0])
-                  }
-                  if (e.key === 'Escape') setShowSuggestions(false)
-                }}
-                placeholder="Search Punjabi, Kapil, anime, shows..."
-                autoComplete="off"
-              />
-              {query && (
-                <button onClick={() => {
-                  setQuery('')
-                  setShowSuggestions(false)
-                }} aria-label="Clear search">
-                  <X size={15} />
-                </button>
-              )}
-
-              {showSuggestions && query.trim() && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 8px)',
-                  left: 0,
-                  right: 0,
-                  zIndex: 100,
-                  background: '#17191f',
-                  border: '1px solid #343844',
-                  borderRadius: '12px',
-                  padding: '8px',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.45)',
-                  maxHeight: '320px',
-                  overflowY: 'auto'
-                }}>
-                  {suggestionItems.length > 0 ? suggestionItems.map((item, index) => (
-                    <button
-                      key={`${item.kind}-${item.value}-${index}`}
-                      onClick={() => chooseSuggestion(item)}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: 0,
-                        borderRadius: '8px',
-                        background: 'transparent',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        textAlign: 'left'
-                      }}
-                    >
-                      <strong>{item.label}</strong>
-                      <small style={{ color: '#a5a9b5', marginTop: '3px' }}>{item.detail}</small>
-                    </button>
-                  )) : (
-                    <p style={{ color: '#a5a9b5', padding: '10px' }}>No suggestions found.</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <label className="select-wrap">
-              <Languages size={16} />
-              <select value={language} onChange={e => {
-                setLanguage(e.target.value)
-                setVisibleCount(12)
-              }}>
-                {languages.map(l => <option key={l}>{l}</option>)}
-              </select>
-              <ChevronDown size={15} />
-            </label>
-
-            <label className="select-wrap">
-              <Film size={16} />
-              <select value={genre} onChange={e => {
-                setGenre(e.target.value)
-                setVisibleCount(12)
-              }}>
-                {genres.map(g => <option key={g}>{g}</option>)}
-              </select>
-              <ChevronDown size={15} />
-            </label>
-          </div>
-
           <div className="category-tabs">
             {categories.map(c => (
               <button
@@ -389,7 +461,19 @@ function App() {
             ))}
           </div>
 
-          {filtered.length ? (
+          {query.trim() ? (
+            <div className="empty-state">
+              <Search size={32} />
+              <h3>Choose a search suggestion</h3>
+              <p>Matching titles are shown in the suggestions under the search bar.</p>
+              <button className="secondary-button" onClick={() => {
+                setQuery('')
+                setShowSuggestions(false)
+              }}>
+                Clear search
+              </button>
+            </div>
+          ) : filtered.length ? (
             <div className="movie-grid">
               {filtered.slice(0, visibleCount).map(m => <Card key={m.id} movie={m} />)}
             </div>
@@ -397,7 +481,7 @@ function App() {
             <div className="empty-state">
               <Film size={32} />
               <h3>No titles found</h3>
-              <p>Try a different search term or clear your filters.</p>
+              <p>Try a different filter or clear your filters.</p>
               <button className="secondary-button" onClick={() => {
                 setQuery('')
                 setCategory('All')
@@ -410,7 +494,7 @@ function App() {
             </div>
           )}
 
-          {filtered.length > visibleCount && (
+          {!query.trim() && filtered.length > visibleCount && (
             <button className="load-more" onClick={() => setVisibleCount(c => c + 12)}>
               Load more titles <span>↓</span>
             </button>
@@ -480,8 +564,9 @@ function App() {
                   <Play size={16} fill="currentColor" /> Find official trailer
                 </button>
                 <button className="secondary-button" onClick={() => {
+                  const alreadySaved = watchlist.includes(selected.id)
                   toggleWatchlist(selected.id)
-                  setNotice(watchlist.includes(selected.id) ? 'Removed from watchlist.' : 'Added to watchlist.')
+                  setNotice(alreadySaved ? 'Removed from watchlist.' : 'Added to watchlist.')
                 }}>
                   <Bookmark size={16} /> Watchlist
                 </button>
@@ -501,7 +586,10 @@ function App() {
         </div>
       )}
 
-      <button className="floating-search" onClick={() => document.getElementById('search')?.focus()} aria-label="Search catalog">
+      <button className="floating-search" onClick={() => {
+        document.getElementById('search')?.focus()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }} aria-label="Search catalog">
         <Search />
       </button>
     </div>
