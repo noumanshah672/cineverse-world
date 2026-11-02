@@ -29,4 +29,13 @@ export const movies: Movie[] = [
  {id:23,title:'Spirited Away',year:2001,type:'Anime',language:'Japanese',genre:'Fantasy / Adventure',description:'A young girl enters a mysterious world of spirits.',poster:'',region:'Japan',status:'Released'},
  {id:24,title:'The Last of Us',year:2023,type:'Series',language:'English',genre:'Drama / Adventure',description:'A dangerous journey connects two survivors in a changed world.',poster:'',region:'United States',status:'Released'}
 ]
-export const categories = ['All','Movies','Series','Anime','Punjabi','Recently Added']
+export const categories = ['All','Movies','Series','Anime','Punjabi','Recently Added'{id:25,title:'The Kapil Sharma Show',year:2016,type:'Series',language:'Hindi',genre:'Comedy / Talk Show',description:'Popular Indian comedy and celebrity talk show.',poster:'',region:'India',status:'Released'},
+{id:26,title:'The Great Indian Kapil Show',year:2024,type:'Series',language:'Hindi',genre:'Comedy / Talk Show',description:'Comedy, celebrity interviews and entertainment.',poster:'',region:'India',status:'Released'},
+{id:27,title:'The Tonight Show Starring Jimmy Fallon',year:2014,type:'Series',language:'English',genre:'Comedy / Talk Show',description:'American late-night comedy and celebrity interviews.',poster:'',region:'United States',status:'Released'},
+{id:28,title:'Britain’s Got Talent',year:2007,type:'Series',language:'English',genre:'Reality / Talent',description:'A talent competition featuring performers from Britain.',poster:'',region:'United Kingdom',status:'Released'},
+{id:29,title:'Shark Tank India',year:2021,type:'Series',language:'Hindi',genre:'Reality / Business',description:'Entrepreneurs present their business ideas to investors.',poster:'',region:'India',status:'Released'},
+{id:30,title:'MasterChef India',year:2010,type:'Series',language:'Hindi',genre:'Cooking / Reality',description:'A cooking competition for talented home cooks.',poster:'',region:'India',status:'Released'},
+{id:31,title:'Planet Earth',year:2006,type:'Series',language:'English',genre:'Nature / Documentary',description:'A documentary series exploring wildlife and nature.',poster:'',region:'United Kingdom',status:'Released'},
+{id:32,title:'Our Planet',year:2019,type:'Series',language:'English',genre:'Nature / Documentary',description:'A nature documentary exploring ecosystems around the world.',poster:'',region:'United Kingdom',status:'Released'},
+{id:33,title:'Tom and Jerry',year:1940,type:'Series',language:'English',genre:'Animation / Comedy',description:'Classic animated comedy featuring Tom and Jerry.',poster:'',region:'United States',status:'Released'},
+{id:34,title:'The Late Show with Stephen Colbert',year:2015,type:'Series',language:'English',genre:'Comedy / Talk Show',description:'American late-night interviews and comedy.',poster:'',region:'United States',status:'Released'}]
