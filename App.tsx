@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react'
 import { Search, Film, Clapperboard, Sparkles, Bookmark, Play, Globe2, ChevronDown, Menu, X, Clock3, Languages, ExternalLink } from 'lucide-react'
 import { movies, categories, type Movie } from './data'
@@ -47,7 +48,10 @@ function App() {
 
   return <div className="app-shell">
     <header className="topbar">
-      <button className="brand" onClick={() => { setCategory('All'); setQuery('') }}><span className="brand-icon"><Clapperboard size={23}/></span><span>CINEVERSE <b>WORLD</b><small>YOUR GLOBAL SCREEN</small></span></button>
+      <button className="brand" onClick={() => { setCategory('All'); setQuery('') }}>
+        <span className="brand-icon"><Clapperboard size={23}/></span>
+        <span>MOVIE <b>NOVA</b><small>A UNIVERSE OF MOVIES & ENTERTAINMENT</small></span>
+      </button>
       <nav className={mobileMenu ? 'nav open' : 'nav'}>
         {['Discover','Movies','Series','Anime','Punjabi'].map(item => <button key={item} className={(item === 'Discover' ? category === 'All' : category === item) ? 'nav-active' : ''} onClick={() => { setCategory(item === 'Discover' ? 'All' : item); setVisibleCount(12); setMobileMenu(false) }}>{item}</button>)}
       </nav>
@@ -80,12 +84,12 @@ function App() {
       </section>
 
       <section className="membership">
-        <div><span className="eyebrow">CINEVERSE PLUS</span><h2>Make it your <em>world.</em></h2><p>Choose a membership plan for additional discovery features. Prices are configurable; streaming rights are separate.</p></div>
-        <div className="price-grid">{[{name:'Monthly',duration:'1 month',price:'499'},{name:'Quarterly',duration:'3 months',price:'1,299'},{name:'Half-Yearly',duration:'6 months',price:'2,299'},{name:'Annual',duration:'1 year',price:'3,999'}].map((p,i)=><div className={`price-card ${i===3?'popular':''}`} key={p.name}>{i===3&&<span className="popular-label">LONG-TERM</span>}<h3>{p.name}</h3><p>{p.duration}</p><div className="price"><small>PKR</small> {p.price}</div><button onClick={()=>setNotice(`Selected ${p.name} plan (PKR ${p.price}). Configure your real Easypaisa receiving details and secure manual verification before accepting payments.`)}>Choose plan</button></div>)}</div>
+        <div><span className="eyebrow">MOVIE NOVA PLUS</span><h2>Make it your <em>world.</em></h2><p>Choose a membership plan for additional discovery features. Prices are configurable; streaming rights are separate.</p></div>
+        <div className="price-grid">{[{name:'Monthly',duration:'1 month',price:'499'},{name:'Quarterly',duration:'3 months',price:'1,299'},{name:'Half-Yearly',duration:'6 months',price:'2,299'},{name:'Annual',duration:'1 year',price:'3,999'}].map((p,i)=><div className={`price-card ${i===3?'popular':''}`} key={p.name}>{i===3&&<span className="popular-label">LONG-TERM</span>}<h3>{p.name}</h3><p>{p.duration}</p><div className="price"><small>PKR</small> {p.price}</div><button onClick={()=>setNotice(`Selected ${p.name} plan (PKR ${p.price}). Payment setup is not yet active.`)}>Choose plan</button></div>)}</div>
       </section>
     </main>
 
-    <footer><div className="footer-brand"><span className="brand-icon"><Clapperboard size={20}/></span><span>CINEVERSE <b>WORLD</b><small>YOUR GLOBAL SCREEN</small></span></div><p>Discover stories from around the world.</p><small>Demo catalog · Streaming availability varies by region. Only use authorized video sources.</small><div className="footer-links"><a href="#catalog">Discover</a><a href="#catalog" onClick={()=>setCategory('Punjabi')}>Punjabi Cinema</a><a href="#catalog">Catalog</a></div></footer>
+    <footer><div className="footer-brand"><span className="brand-icon"><Clapperboard size={20}/></span><span>MOVIE <b>NOVA</b><small>A UNIVERSE OF MOVIES & ENTERTAINMENT</small></span></div><p>Discover movies and stories from around the world.</p><small>Demo catalog · Streaming availability varies by region. Only use authorized video sources.</small><div className="footer-links"><a href="#catalog">Discover</a><a href="#catalog" onClick={()=>setCategory('Punjabi')}>Punjabi Cinema</a><a href="#catalog">Catalog</a></div></footer>
 
     {selected && <div className="modal-backdrop" onClick={()=>setSelected(null)}><div className="detail-modal" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setSelected(null)} aria-label="Close"><X/></button><div className="modal-art"><Film size={44}/><span>{selected.language} CINEMA</span></div><div className="modal-body"><span className="eyebrow">{selected.region.toUpperCase()} · {selected.type.toUpperCase()}</span><h2>{selected.title}</h2><p className="modal-meta">{selected.year} · {selected.language} · {selected.genre}</p><p>{selected.description}</p><div className="modal-actions"><button className="primary-button" onClick={()=>selected.trailerUrl ? window.open(selected.trailerUrl,'_blank','noopener,noreferrer') : setNotice('No verified trailer has been configured for this title yet.')}><Play size={16} fill="currentColor"/> Find official trailer</button><button className="secondary-button" onClick={()=>{toggleWatchlist(selected.id);setNotice(watchlist.includes(selected.id)?'Removed from watchlist.':'Added to watchlist.')}}><Bookmark size={16}/> Watchlist</button></div><p className="fine-print">This discovery demo does not host full movies. Watching options depend on verified legal providers and regional availability.</p></div></div></div>}
     {notice && <div className="toast" role="status">{notice}<button onClick={()=>setNotice('')}><X size={15}/></button></div>}
